@@ -1,0 +1,45 @@
+<%- include('../partials/header') %>
+
+          <div class="content-wrapper">
+            <div class="container-xxl flex-grow-1 container-p-y">
+              <div class="row justify-content-center">
+                <div class="col-xl-8 col-lg-10">
+                  <div class="card mb-6">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                      <h5 class="mb-0">Add Blog</h5>
+                      <a href="/view-blog" class="btn btn-sm btn-outline-primary">View Blog</a>
+                    </div>
+                    <div class="card-body">
+                      <% if (error) { %>
+                        <div class="alert alert-danger"><%= error %></div>
+                      <% } %>
+                      <% if (success) { %>
+                        <div class="alert alert-success"><%= success %></div>
+                      <% } %>
+                      <form action="/add-blog" method="POST" enctype="multipart/form-data">
+                        <div class="form-floating form-floating-outline mb-5">
+                          <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
+                          <label for="image">Blog Image</label>
+                        </div>
+                        <div class="form-floating form-floating-outline mb-5">
+                          <input type="text" class="form-control" id="title" name="title" placeholder="Enter blog title" required>
+                          <label for="title">Title</label>
+                        </div>
+                        <div class="form-floating form-floating-outline mb-5">
+                          <input type="text" class="form-control" id="authername" name="authername" placeholder="Enter author name" required>
+                          <label for="authername">Author Name</label>
+                        </div>
+                        <div class="form-floating form-floating-outline mb-5">
+                          <textarea class="form-control" id="desc" name="desc" placeholder="Enter description" style="height:140px" required></textarea>
+                          <label for="desc">Description</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Blog</button>
+                        <a href="/dashboard" class="btn btn-outline-secondary ms-2">Back</a>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+<%- include('../partials/footer') %>
