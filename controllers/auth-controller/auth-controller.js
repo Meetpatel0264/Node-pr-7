@@ -4,7 +4,7 @@ const passport = require("../../middleware/passport");
 
 const renderLogin = (req, res) => {
     res.render("auth/login", {
-        error: null,
+        error: req.query.error ? "Invalid email or password" : null,
         success: null
     });
 };
@@ -63,92 +63,29 @@ const registerUser = async (req, res) => {
     }
 };
 
-const loginUser = async (req, res, next) => {
-    try {
-        let { email, password } = req.body;
-
-        email = email ? email.toLowerCase().trim() : "";
-        password = password ? password.trim() : "";
-
-        if (!email || !password) {
-            return res.render("auth/login", {
-                error: "Email and password are required",
-                success: null
-            });
-        }
-
-        // const user = await User.findOne({ email });
-        // if (!user) {
-        //     return res.render("auth/login", {
-        //         error: "Invalid email or password",
-        //         success: null
-        //     });
-        // }
-        // const isMatch = await bcrypt.compare(password, user.password);
-        // if (!isMatch) {
-        //     return res.render("auth/login", {
-        //         error: "Invalid email or password",
-        //         success: null
-        //     });
-        // }
-        // res.cookie("userId", user._id.toString());
-        // return res.redirect("/dashboard");
-
-        passport.authenticate("local", (err, user, info) => {
-            if (err) {
-                console.error(err);
-                return res.render("auth/login", {
-                    error: "Login failed. Please try again.",
-                    success: null
-                });
-            }
-
-            if (!user) {
-                return res.render("auth/login", {
-                    error: info && info.message ? info.message : "Invalid email or password",
-                    success: null
-                });
-            }
-
-            req.logIn(user, (loginErr) => {
-                if (loginErr) {
-                    console.error(loginErr);
-                    return res.render("auth/login", {
-                        error: "Login failed. Please try again.",
-                        success: null
-                    });
-                }
-
-                res.cookie("userId", user._id.toString());
-                return res.redirect("/dashboard");
-            });
-        })(req, res, next);
-
-    } catch (error) {
-        console.error(error);
-
-        return res.render("auth/login", {
-            error: "Login failed. Please try again.",
-            success: null
-        });
-    }
+const loginUser = (req, res, next) => {
+    passport.authenticate("local", {
+        successRedirect: "/dashboard",
+        failureRedirect: "/login?error=1",
+        failureFlash: false
+    })(req, res, next);
 };
 
 const logoutUser = (req, res, next) => {
-    res.clearCookie("userId");
+    req.logout((err) => {
+        if (err) {
+            return next(err);
+        }
 
-    if (req.logout) {
-        return req.logout((err) => {
-            if (err) {
-                return next(err);
+        req.session.destroy((sessionErr) => {
+            if (sessionErr) {
+                return next(sessionErr);
             }
-            req.session.destroy(() => {
-                return res.redirect("/login");
-            });
-        });
-    }
 
-    return res.redirect("/login");
+            res.clearCookie("sessionId");
+            return res.redirect("/login");
+        });
+    });
 };
 
 module.exports = {

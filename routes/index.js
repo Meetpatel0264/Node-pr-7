@@ -4,33 +4,10 @@ const dashboardController = require("../controllers/dashboard-controller/dashboa
 const blogController = require("../controllers/blog-controller/blog-controller");
 const viewController = require("../controllers/view-controller/view-controller");
 const upload = require("../middleware/multer");
-const passport = require("passport");
+const { isLoggedIn, checkUserLogin, checkUserLogout } = require("../middleware/user-check/userCheck");
 
 const router = express.Router();
 
-const isLoggedIn = (req) => {
-    return (req.isAuthenticated && req.isAuthenticated()) || (req.cookies && req.cookies.userId);
-};
-
-const checkLogin = (req, res) => {
-
-    if (!isLoggedIn(req)) {
-        res.redirect("/login");
-        return false;
-    }
-
-    return true;
-};
-
-const checkGuest = (req, res) => {
-    
-    if (isLoggedIn(req)) {
-        res.redirect("/dashboard");
-        return false;
-    }
-
-    return true;
-};
 
 router.get("/", (req, res) => {
     if (isLoggedIn(req)) {
@@ -40,93 +17,33 @@ router.get("/", (req, res) => {
     res.redirect("/login");
 });
 
-router.get("/login", (req, res) => {
-    if (!checkGuest(req, res)) {
-        return;
-    }
-    authController.renderLogin(req, res);
-});
+router.get("/login", checkUserLogout, authController.renderLogin);
 
-router.post("/login", (req, res, next) => {
-    if (!checkGuest(req, res)) {
-        return;
-    }
-    authController.loginUser(req, res, next);
-});
+router.post("/login", checkUserLogout, authController.loginUser);
 
-router.get("/register", (req, res) => {
-    if (!checkGuest(req, res)) {
-        return;
-    }
-    authController.renderRegister(req, res);
-});
+router.get("/register", checkUserLogout, authController.renderRegister);
 
-router.post("/register", (req, res) => {
-    if (!checkGuest(req, res)) {
-        return;
-    }
-    authController.registerUser(req, res);
-});
+router.post("/register", checkUserLogout, authController.registerUser);
 
 router.get("/logout", authController.logoutUser);
 
-router.get("/dashboard", (req, res) => {
-    if (!checkLogin(req, res)) {
-        return;
-    }
-    dashboardController.dashboard(req, res);
-});
+router.get("/dashboard", checkUserLogin, dashboardController.dashboard);
 
 router.get("/analytics", (req, res) => res.redirect("/dashboard"));
 
-router.get("/add-blog", (req, res) => {
-    if (!checkLogin(req, res)) {
-        return;
-    }
-    blogController.addBlogPage(req, res);
-});
+router.get("/add-blog", checkUserLogin, blogController.addBlogPage);
 
-router.post("/add-blog", upload.single("image"), (req, res) => {
-    if (!checkLogin(req, res)) {
-        return;
-    }
-    blogController.addBlog(req, res);
-});
+router.post("/add-blog", checkUserLogin, upload.single("image"), blogController.addBlog);
 
-router.get("/view-blog", (req, res) => {
-    if (!checkLogin(req, res)) {
-        return;
-    }
-    viewController.viewBlogs(req, res);
-});
+router.get("/view-blog", checkUserLogin, viewController.viewBlogs);
 
-router.get("/blog/:id", (req, res) => {
-    if (!checkLogin(req, res)) {
-        return;
-    }
-    viewController.singleBlog(req, res);
-});
+router.get("/blog/:id", checkUserLogin, viewController.singleBlog);
 
-router.get("/edit-blog/:id", (req, res) => {
-    if (!checkLogin(req, res)) {
-        return;
-    }
-    blogController.editBlogPage(req, res);
-});
+router.get("/edit-blog/:id", checkUserLogin, blogController.editBlogPage);
 
-router.post("/update-blog/:id", upload.single("image"), (req, res) => {
-    if (!checkLogin(req, res)) {
-        return;
-    }
-    blogController.updateBlog(req, res);
-});
+router.post("/update-blog/:id", checkUserLogin, upload.single("image"), blogController.updateBlog);
 
-router.get("/delete-blog/:id", (req, res) => {
-    if (!checkLogin(req, res)) {
-        return;
-    }
-    viewController.deleteBlog(req, res);
-});
+router.get("/delete-blog/:id", checkUserLogin, viewController.deleteBlog);
 
 router.get("/miscError", (req, res) => {
     res.status(404).render("Misc/miscError");

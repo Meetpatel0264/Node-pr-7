@@ -9,9 +9,16 @@ passport.use(new LocalStrategy(
         usernameField: "email"
     }, async (email, password, done) => {
         try {
-            const user = await User.findOne({
-                email: email.toLowerCase().trim(),
-            });
+            email = email ? email.toLowerCase().trim() : "";
+            password = password ? password.trim() : "";
+
+            if (!email || !password) {
+                return done(null, false, {
+                    message: "Email and password are required"
+                });
+            }
+
+            const user = await User.findOne({ email });
             
             if (!user) {
                 return done(null, false, {

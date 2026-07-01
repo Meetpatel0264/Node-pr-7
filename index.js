@@ -17,13 +17,25 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(
     expressSession({
+        name: "sessionId",
         secret: "mysecretkey",
         resave: false,
         saveUninitialized: false,
+        cookie: {
+            httpOnly: false,
+            secure: false,
+            sameSite: "lax",
+            maxAge: 1000 * 60 * 60 * 24
+        }
     })
 );
 app.use(passport.initialize());
 app.use(passport.session());
+app.use((req, res, next) => {
+    res.locals.loginUser = req.user || null;
+    res.locals.sessionId = req.sessionID || null;
+    next();
+});
 
 app.use("/", require("./routes"));
 
