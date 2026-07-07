@@ -29,3 +29,5 @@ A secure **Admin Panel** built with **Node.js, Express.js, MongoDB, EJS, Passpor
 * Multer
 * EJS
 * Cookie
+
+Auther Name : Meet Patel
